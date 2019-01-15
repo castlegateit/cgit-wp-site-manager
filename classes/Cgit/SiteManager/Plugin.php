@@ -116,7 +116,7 @@ class Plugin
             return;
         }
 
-        wp_die($this->error);
+        $this->nope();
     }
 
     /**
