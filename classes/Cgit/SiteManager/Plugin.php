@@ -41,6 +41,8 @@ class Plugin
 
         add_action('current_screen', [$this, 'blockUserEdit']);
         add_action('current_screen', [$this, 'blockThemeEdit']);
+        add_action('user_register', [$this, 'blockUserCreate']);
+        add_action('profile_update', [$this, 'blockUserCreate']);
         add_action('delete_user', [$this, 'blockUserDelete']);
         add_action('admin_menu', [$this, 'hideThemePages']);
 
@@ -141,6 +143,27 @@ class Plugin
         }
 
         $this->nope();
+    }
+
+    /**
+     * Block user create
+     *
+     * Prevent site managers from creating admin users even if they somehow get
+     * through the blocked menu on the add-new-user or edit-user screen.
+     *
+     * @param integer $user_id
+     * @return void
+     */
+    public function blockUserCreate($user_id)
+    {
+        if (!$this->isSiteManager() || !$this->isAdmin($user_id)) {
+            return;
+        }
+
+        $user = $this->getUserInstance($user_id);
+
+        $user->remove_role($this->adminRole);
+        $user->add_role($this->role);
     }
 
     /**
