@@ -34,7 +34,7 @@ class Plugin
     {
         $plugin = CGIT_SITE_MANAGER_PLUGIN;
 
-        $this->name = apply_filters('cgit_site_manager_role_name', $this->name);
+        $this->role = apply_filters('cgit_site_manager_role_name', $this->role);
         $this->label = apply_filters('cgit_site_manager_role_label', $this->label);
 
         register_activation_hook($plugin, [$this, 'createRole']);
