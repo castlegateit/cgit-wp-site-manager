@@ -39,6 +39,7 @@ class Plugin
 
         register_activation_hook($plugin, [$this, 'createRole']);
 
+        add_action('set_user_role', [$this, 'blockDirectUserEdit'], 10, 3);
         add_action('current_screen', [$this, 'blockUserEdit']);
         add_action('current_screen', [$this, 'blockThemeEdit']);
         add_action('user_register', [$this, 'blockUserCreate']);
@@ -99,6 +100,36 @@ class Plugin
         return array_diff_key($roles, [
             $this->adminRole => null,
         ]);
+    }
+
+    /**
+     * Block direct user edit
+     *
+     * Prevent anyone except administrators from changing the role of an
+     * administrator user via the set_role method in the WP_User class. This
+     * actually reverts the change after it has been made.
+     *
+     * @param integer $user_id
+     * @param string $new_role
+     * @param array $old_roles
+     * @return void
+     */
+    public function blockDirectUserEdit($user_id, $new_role, $old_roles)
+    {
+        $old_role = array_values($old_roles)[0];
+
+        // Current user is an admin user? Previous user role was not an admin
+        // role? Permit it.
+        if ($this->isAdmin() || $old_role !== $this->adminRole) {
+            return;
+        }
+
+        // Revert role change
+        $user = get_userdata($user_id);
+        $user->set_role($old_role);
+
+        // Issue mild rebuke
+        $this->nope();
     }
 
     /**
