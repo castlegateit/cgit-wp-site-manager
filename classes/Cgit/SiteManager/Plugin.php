@@ -26,6 +26,29 @@ class Plugin
     private $adminRole = 'administrator';
 
     /**
+     * User-related capabilities
+     *
+     * @var array
+     */
+    private $userCapabilities = [
+        'create_users' => true,
+        'delete_users' => true,
+        'edit_users' => true,
+        'list_users' => true,
+        'promote_users' => true,
+        'remove_users' => true,
+    ];
+
+    /**
+     * Theme-related capabilities
+     *
+     * @var array
+     */
+    private $themeCapabilities = [
+        'edit_theme_options' => true,
+    ];
+
+    /**
      * Construct
      *
      * @return void
@@ -39,15 +62,36 @@ class Plugin
 
         register_activation_hook($plugin, [$this, 'createRole']);
 
-        add_action('set_user_role', [$this, 'blockDirectUserEdit'], 10, 3);
-        add_action('current_screen', [$this, 'blockUserEdit']);
-        add_action('current_screen', [$this, 'blockThemeEdit']);
-        add_action('user_register', [$this, 'blockUserCreate']);
-        add_action('profile_update', [$this, 'blockUserCreate']);
-        add_action('delete_user', [$this, 'blockUserDelete']);
-        add_action('admin_menu', [$this, 'hideThemePages']);
+        $this->addUserActions();
+        $this->addThemeActions();
+    }
 
-        add_filter('editable_roles', [$this, 'blockEditableRoles']);
+    /**
+     * Site manager role can edit users?
+     *
+     * @return bool
+     */
+    public function hasUserCapabilities(): bool
+    {
+        if (!defined('SITE_MANAGER_EDIT_USERS') || SITE_MANAGER_EDIT_USERS) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Site manager role can edit theme (navigation)?
+     *
+     * @return bool
+     */
+    public function hasThemeCapabilities(): bool
+    {
+        if (!defined('SITE_MANAGER_EDIT_THEME') || SITE_MANAGER_EDIT_THEME) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -61,18 +105,15 @@ class Plugin
     public function createRole()
     {
         $role = apply_filters('cgit_site_manager_base_role', 'editor');
-        $caps = array_merge(get_role($role)->capabilities, [
-            // Edit users
-            'create_users' => true,
-            'delete_users' => true,
-            'edit_users' => true,
-            'list_users' => true,
-            'promote_users' => true,
-            'remove_users' => true,
+        $caps = get_role($role)->capabilities;
 
-            // Edit menus
-            'edit_theme_options' => true,
-        ]);
+        if ($this->hasUserCapabilities()) {
+            $caps = array_merge($caps, $this->userCapabilities);
+        }
+
+        if ($this->hasThemeCapabilities()) {
+            $caps = array_merge($caps, $this->themeCapabilities);
+        }
 
         // Site manager capabilities can be edited via a filter. This will only
         // take effect when the plugin is reactivated.
@@ -80,6 +121,41 @@ class Plugin
 
         remove_role($this->role);
         add_role($this->role, $this->label, $caps);
+    }
+
+    /**
+     * Add user-related actions and filters
+     *
+     * @return void
+     */
+    private function addUserActions(): void
+    {
+        if (!$this->hasUserCapabilities()) {
+            return;
+        }
+
+        add_action('set_user_role', [$this, 'blockDirectUserEdit'], 10, 3);
+        add_action('current_screen', [$this, 'blockUserEdit']);
+        add_action('user_register', [$this, 'blockUserCreate']);
+        add_action('profile_update', [$this, 'blockUserCreate']);
+        add_action('delete_user', [$this, 'blockUserDelete']);
+
+        add_filter('editable_roles', [$this, 'blockEditableRoles']);
+    }
+
+    /**
+     * Add theme-related actions and filters
+     *
+     * @return void
+     */
+    private function addThemeActions(): void
+    {
+        if (!$this->hasThemeCapabilities()) {
+            return;
+        }
+
+        add_action('current_screen', [$this, 'blockThemeEdit']);
+        add_action('admin_menu', [$this, 'hideThemePages']);
     }
 
     /**

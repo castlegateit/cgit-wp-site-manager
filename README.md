@@ -15,6 +15,17 @@ Castlegate IT WP Site Manager is a WordPress plugin that adds a site manager use
 
 Note that user capabilities are stored in the database. Some of these filters may not take effect until the plugin is restarted.
 
+## Disable features
+
+The user and theme capabilities can be disabled by setting constants in `wp-config.php`.
+
+~~~ php
+define('SITE_MANAGER_EDIT_USERS', false);
+define('SITE_MANAGER_EDIT_THEME', false);
+~~~
+
+These must be set before the plugin is activated. To make changes to the role after the plugin has been activated, reactivate the plugin.
+
 ## License
 
 Copyright (c) 2019 Castlegate IT. All rights reserved.
