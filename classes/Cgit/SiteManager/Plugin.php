@@ -192,7 +192,7 @@ class Plugin
      */
     public function blockDirectUserEdit($user_id, $new_role, $old_roles)
     {
-        $old_role = array_values($old_roles)[0];
+        $old_role = array_values($old_roles)[0] ?? null;
 
         // Current user is an admin user? Previous user role was not an admin
         // role? Permit it.
