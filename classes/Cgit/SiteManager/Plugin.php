@@ -60,6 +60,10 @@ class Plugin
         $this->role = apply_filters('cgit_site_manager_role_name', $this->role);
         $this->label = apply_filters('cgit_site_manager_role_label', $this->label);
 
+        if (is_multisite()) {
+            $this->userCapabilities['manage_network_users'] = true;
+        }
+
         register_activation_hook($plugin, [$this, 'createRole']);
 
         $this->addUserActions();
@@ -112,12 +116,39 @@ class Plugin
     /**
      * Create site manager user role
      *
+     * @return void
+     */
+    public function createRole()
+    {
+        if (!is_multisite()) {
+            $this->createRoleCurrentSite();
+            return;
+        }
+
+        $site_ids = get_sites([
+            'fields' => 'ids',
+        ]);
+
+        if (!is_array($site_ids) || !$site_ids) {
+            return;
+        }
+
+        foreach ($site_ids as $site_id) {
+            switch_to_blog($site_id);
+            $this->createRoleCurrentSite();
+            restore_current_blog();
+        }
+    }
+
+    /**
+     * Create site manager user role
+     *
      * The new user role should have all the capabilities of the editor role
      * plus the ability to edit users and navigation menus.
      *
      * @return void
      */
-    public function createRole()
+    public function createRoleCurrentSite(): void
     {
         $role = apply_filters('cgit_site_manager_base_role', 'editor');
         $caps = get_role($role)->capabilities;
