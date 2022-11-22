@@ -1,6 +1,6 @@
 # Castlegate IT WP Site Manager
 
-Castlegate IT WP Site Manager is a WordPress plugin that adds a site manager user role with the same capabilities as an editor, plus the ability to edit navigation menus and make changes to non-administrator users.
+Castlegate IT WP Site Manager is a WordPress plugin that adds a site manager user role with the same capabilities as an editor, plus the ability to edit navigation menus and make changes to non-administrator users. The role also allows a user to edit the privacy policy page without giving full access to the site options.
 
 ## Filters
 
@@ -22,6 +22,7 @@ The user and theme capabilities can be disabled by setting constants in `wp-conf
 ~~~ php
 define('SITE_MANAGER_EDIT_USERS', false);
 define('SITE_MANAGER_EDIT_THEME', false);
+define('SITE_MANAGER_EDIT_PRIVACY_POLICY', false);
 ~~~
 
 These must be set before the plugin is activated. To make changes to the role after the plugin has been activated, reactivate the plugin.

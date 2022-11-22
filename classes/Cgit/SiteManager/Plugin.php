@@ -64,6 +64,7 @@ class Plugin
 
         $this->addUserActions();
         $this->addThemeActions();
+        $this->addPrivacyPolicyActions();
     }
 
     /**
@@ -88,6 +89,20 @@ class Plugin
     public function hasThemeCapabilities(): bool
     {
         if (!defined('SITE_MANAGER_EDIT_THEME') || SITE_MANAGER_EDIT_THEME) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Site manager role can edit privacy policy?
+     *
+     * @return bool
+     */
+    public function hasPrivacyPolicyCapabilities(): bool
+    {
+        if (!defined('SITE_MANAGER_EDIT_PRIVACY_POLICY') || SITE_MANAGER_EDIT_PRIVACY_POLICY) {
             return true;
         }
 
@@ -156,6 +171,20 @@ class Plugin
 
         add_action('current_screen', [$this, 'blockThemeEdit']);
         add_action('admin_menu', [$this, 'hideThemePages']);
+    }
+
+    /**
+     * Add privacy policy actions and filters
+     *
+     * @return void
+     */
+    private function addPrivacyPolicyActions(): void
+    {
+        if (!$this->hasPrivacyPolicyCapabilities()) {
+            return;
+        }
+
+        add_filter('user_has_cap', [$this, 'appendPrivacyPolicyCapabilities'], 20, 4);
     }
 
     /**
@@ -429,5 +458,37 @@ class Plugin
         $message = apply_filters('cgit_site_manager_error_message', $message);
 
         wp_die($message, $title, 403);
+    }
+
+    /**
+     * Append privacy policy capabilities for site manager users
+     *
+     * Because the "manage_options" capability is needed to edit the privacy
+     * policy page and because the site manager user role is not intended to
+     * have access to the site options, this feature uses a filter on the result
+     * of the "user_can" function instead of permanently adding capabilities to
+     * the site manager user role.
+     *
+     * @param array $caps Current user capabilities.
+     * @param array $req_caps User capabilities to check.
+     * @param array $args Additional user_can function parameters.
+     * @param WP_User $wp_user WP_User instance.
+     * @return array
+     */
+    public function appendPrivacyPolicyCapabilities($caps, $req_caps, $args, $wp_user): array
+    {
+        if (!in_array($this->role, $wp_user->roles)) {
+            return $caps;
+        }
+
+        $post_id = (int) ($args[2] ?? 0);
+        $privacy_page_id = (int) get_option('wp_page_for_privacy_policy');
+
+        if ($post_id && $privacy_page_id && $post_id === $privacy_page_id) {
+            $caps['edit_others_pages'] = true;
+            $caps['manage_options'] = true;
+        }
+
+        return $caps;
     }
 }
