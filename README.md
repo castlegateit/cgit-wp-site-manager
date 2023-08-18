@@ -15,6 +15,13 @@ Castlegate IT WP Site Manager is a WordPress plugin that adds a site manager use
 
 Note that user capabilities are stored in the database. Some of these filters may not take effect until the plugin is restarted.
 
+## Plugins
+
+If installed and active, site manager users will be granted access to the features added by the following plugins:
+
+*   [Gravity Forms](https://www.gravityforms.com/)
+*   [WooCommerce](https://woocommerce.com/)
+
 ## Disable features
 
 The user and theme capabilities can be disabled by setting constants in `wp-config.php`.
@@ -23,6 +30,8 @@ The user and theme capabilities can be disabled by setting constants in `wp-conf
 define('SITE_MANAGER_EDIT_USERS', false);
 define('SITE_MANAGER_EDIT_THEME', false);
 define('SITE_MANAGER_EDIT_PRIVACY_POLICY', false);
+define('SITE_MANAGER_EDIT_GRAVITY_FORMS', false);
+define('SITE_MANAGER_EDIT_WOOCOMMERCE', false);
 ~~~
 
 These must be set before the plugin is activated. To make changes to the role after the plugin has been activated, reactivate the plugin.

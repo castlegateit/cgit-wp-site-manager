@@ -69,6 +69,10 @@ class Plugin
         $this->addUserActions();
         $this->addThemeActions();
         $this->addPrivacyPolicyActions();
+
+        // Plugins
+        $this->addGravityFormsActions();
+        $this->addWooCommerceActions();
     }
 
     /**
@@ -107,6 +111,34 @@ class Plugin
     public function hasPrivacyPolicyCapabilities(): bool
     {
         if (!defined('SITE_MANAGER_EDIT_PRIVACY_POLICY') || SITE_MANAGER_EDIT_PRIVACY_POLICY) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Site manager role has Gravity Forms capabilities?
+     *
+     * @return bool
+     */
+    public function hasGravityFormsCapabilities(): bool
+    {
+        if (!defined('SITE_MANAGER_EDIT_GRAVITY_FORMS') || SITE_MANAGER_EDIT_GRAVITY_FORMS) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Site manager role has WooCommerce capabilities?
+     *
+     * @return bool
+     */
+    public function hasWooCommerceCapabilities(): bool
+    {
+        if (!defined('SITE_MANAGER_EDIT_WOOCOMMERCE') || SITE_MANAGER_EDIT_WOOCOMMERCE) {
             return true;
         }
 
@@ -216,6 +248,34 @@ class Plugin
         }
 
         add_filter('user_has_cap', [$this, 'appendPrivacyPolicyCapabilities'], 20, 4);
+    }
+
+    /**
+     * Add Gravity Forms actions and filters
+     *
+     * @return void
+     */
+    private function addGravityFormsActions(): void
+    {
+        if (!$this->hasGravityFormsCapabilities()) {
+            return;
+        }
+
+        add_filter('user_has_cap', [$this, 'appendGravityFormsCapabilities'], 20, 4);
+    }
+
+    /**
+     * Add WooCommerce actions and filters
+     *
+     * @return void
+     */
+    private function addWooCommerceActions(): void
+    {
+        if (!$this->hasWooCommerceCapabilities()) {
+            return;
+        }
+
+        add_filter('user_has_cap', [$this, 'appendWooCommerceCapabilities'], 20, 4);
     }
 
     /**
@@ -521,5 +581,93 @@ class Plugin
         }
 
         return $caps;
+    }
+
+    /**
+     * Append Gravity Forms capabilities
+     *
+     * @param array $all_caps Current user capabilities.
+     * @param array $caps User capabilities to check.
+     * @param array $args Additional user_can function parameters.
+     * @param WP_User $wp_user WP_User instance.
+     * @return array
+     */
+    public function appendGravityFormsCapabilities($all_caps, $caps, $args, $user): array
+    {
+        if (!in_array($this->role, $user->roles)) {
+            return $all_caps;
+        }
+
+        // Grant access to Gravity Forms
+        // https://docs.gravityforms.com/role-management-guide/
+        $all_caps['gravityforms_create_form'] = true;
+        $all_caps['gravityforms_delete_forms'] = true;
+        $all_caps['gravityforms_edit_forms'] = true;
+        $all_caps['gravityforms_preview_forms'] = true;
+        $all_caps['gravityforms_view_entries'] = true;
+        $all_caps['gravityforms_edit_entries'] = true;
+        $all_caps['gravityforms_delete_entries'] = true;
+        $all_caps['gravityforms_view_entry_notes'] = true;
+        $all_caps['gravityforms_edit_entry_notes'] = true;
+        $all_caps['gravityforms_export_entries'] = true;
+        // $all_caps['gravityforms_view_settings'] = true;
+        // $all_caps['gravityforms_edit_settings'] = true;
+        // $all_caps['gravityforms_view_updates'] = true;
+        // $all_caps['gravityforms_view_addons'] = true;
+        // $all_caps['gravityforms_system_status'] = true;
+        // $all_caps['gravityforms_uninstall'] = true;
+        // $all_caps['gravityforms_logging'] = true;
+        // $all_caps['gravityforms_api_settings'] = true;
+
+        return $all_caps;
+    }
+
+    /**
+     * Append WooCommerce capabilities
+     *
+     * @param array $all_caps Current user capabilities.
+     * @param array $caps User capabilities to check.
+     * @param array $args Additional user_can function parameters.
+     * @param WP_User $wp_user WP_User instance.
+     * @return array
+     */
+    public function appendWooCommerceCapabilities($all_caps, $caps, $args, $user): array
+    {
+        if (!in_array($this->role, $user->roles)) {
+            return $all_caps;
+        }
+
+        // Grant access to WooCommerce post types
+        $types = [
+            'product',
+            'shop_order',
+            'shop_coupon'
+        ];
+
+        foreach ($types as $type) {
+            $all_caps["edit_{$type}"] = true;
+            $all_caps["read_{$type}"] = true;
+            $all_caps["delete_{$type}"] = true;
+            $all_caps["edit_{$type}s"] = true;
+            $all_caps["edit_others_{$type}s"] = true;
+            $all_caps["publish_{$type}s"] = true;
+            $all_caps["read_private_{$type}s"] = true;
+            $all_caps["delete_{$type}s"] = true;
+            $all_caps["delete_private_{$type}s"] = true;
+            $all_caps["delete_published_{$type}s"] = true;
+            $all_caps["delete_others_{$type}s"] = true;
+            $all_caps["edit_private_{$type}s"] = true;
+            $all_caps["edit_published_{$type}s"] = true;
+            $all_caps["manage_{$type}_terms"] = true;
+            $all_caps["edit_{$type}_terms"] = true;
+            $all_caps["delete_{$type}_terms"] = true;
+            $all_caps["assign_{$type}_terms"] = true;
+        }
+
+        // Grant access to WooCommerce settings
+        $all_caps['manage_woocommerce'] = true;
+        $all_caps['view_woocommerce_reports'] = true;
+
+        return $all_caps;
     }
 }
