@@ -73,6 +73,7 @@ class Plugin
         // Plugins
         $this->addGravityFormsActions();
         $this->addWooCommerceActions();
+        $this->addYoastActions();
     }
 
     /**
@@ -139,6 +140,20 @@ class Plugin
     public function hasWooCommerceCapabilities(): bool
     {
         if (!defined('SITE_MANAGER_EDIT_WOOCOMMERCE') || SITE_MANAGER_EDIT_WOOCOMMERCE) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Site manager role has Yoast capabilities?
+     *
+     * @return bool
+     */
+    public function hasYoastCapabilities(): bool
+    {
+        if (!defined('SITE_MANAGER_EDIT_YOAST') || SITE_MANAGER_EDIT_YOAST) {
             return true;
         }
 
@@ -276,6 +291,20 @@ class Plugin
         }
 
         add_filter('user_has_cap', [$this, 'appendWooCommerceCapabilities'], 20, 4);
+    }
+
+    /**
+     * Add Yoast actions and filters
+     *
+     * @return void
+     */
+    private function addYoastActions(): void
+    {
+        if (!$this->hasYoastCapabilities()) {
+            return;
+        }
+
+        add_filter('user_has_cap', [$this, 'appendYoastCapabilities'], 20, 4);
     }
 
     /**
@@ -667,6 +696,30 @@ class Plugin
         // Grant access to WooCommerce settings
         $all_caps['manage_woocommerce'] = true;
         $all_caps['view_woocommerce_reports'] = true;
+
+        return $all_caps;
+    }
+
+    /**
+     * Append Yoast capabilities
+     *
+     * @param array $all_caps Current user capabilities.
+     * @param array $caps User capabilities to check.
+     * @param array $args Additional user_can function parameters.
+     * @param WP_User $wp_user WP_User instance.
+     * @return array
+     */
+    public function appendYoastCapabilities($all_caps, $caps, $args, $user): array
+    {
+        if (!in_array($this->role, $user->roles)) {
+            return $all_caps;
+        }
+
+        // Grant access to Yoast
+        $all_caps['wpseo_bulk_edit'] = true;
+        $all_caps['wpseo_edit_advanced_metadata'] = true;
+        $all_caps['wpseo_manage_options'] = true;
+        $all_caps['wpseo_manage_redirects'] = true;
 
         return $all_caps;
     }

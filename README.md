@@ -32,6 +32,7 @@ define('SITE_MANAGER_EDIT_THEME', false);
 define('SITE_MANAGER_EDIT_PRIVACY_POLICY', false);
 define('SITE_MANAGER_EDIT_GRAVITY_FORMS', false);
 define('SITE_MANAGER_EDIT_WOOCOMMERCE', false);
+define('SITE_MANAGER_EDIT_YOAST', false);
 ~~~
 
 These must be set before the plugin is activated. To make changes to the role after the plugin has been activated, reactivate the plugin.
