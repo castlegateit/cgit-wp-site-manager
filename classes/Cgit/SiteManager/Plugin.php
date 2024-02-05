@@ -69,11 +69,6 @@ class Plugin
         $this->addUserActions();
         $this->addThemeActions();
         $this->addPrivacyPolicyActions();
-
-        // Plugins
-        $this->addGravityFormsActions();
-        $this->addWooCommerceActions();
-        $this->addYoastActions();
     }
 
     /**
@@ -212,6 +207,14 @@ class Plugin
         // take effect when the plugin is reactivated.
         $caps = apply_filters('cgit_site_manager_capabilities', $caps);
 
+        // Plugins
+        $caps = array_merge(
+            $caps,
+            $this->getGravityFormsCapabilities(),
+            $this->getWooCommerceCapabilities(),
+            $this->getYoastCapabilities()
+        );
+
         remove_role($this->role);
         add_role($this->role, $this->label, $caps);
     }
@@ -263,48 +266,6 @@ class Plugin
         }
 
         add_filter('user_has_cap', [$this, 'appendPrivacyPolicyCapabilities'], 20, 4);
-    }
-
-    /**
-     * Add Gravity Forms actions and filters
-     *
-     * @return void
-     */
-    private function addGravityFormsActions(): void
-    {
-        if (!$this->hasGravityFormsCapabilities()) {
-            return;
-        }
-
-        add_filter('user_has_cap', [$this, 'appendGravityFormsCapabilities'], 20, 4);
-    }
-
-    /**
-     * Add WooCommerce actions and filters
-     *
-     * @return void
-     */
-    private function addWooCommerceActions(): void
-    {
-        if (!$this->hasWooCommerceCapabilities()) {
-            return;
-        }
-
-        add_filter('user_has_cap', [$this, 'appendWooCommerceCapabilities'], 20, 4);
-    }
-
-    /**
-     * Add Yoast actions and filters
-     *
-     * @return void
-     */
-    private function addYoastActions(): void
-    {
-        if (!$this->hasYoastCapabilities()) {
-            return;
-        }
-
-        add_filter('user_has_cap', [$this, 'appendYoastCapabilities'], 20, 4);
     }
 
     /**
@@ -613,57 +574,49 @@ class Plugin
     }
 
     /**
-     * Append Gravity Forms capabilities
+     * Return Gravity Forms capabilities
      *
-     * @param array $all_caps Current user capabilities.
-     * @param array $caps User capabilities to check.
-     * @param array $args Additional user_can function parameters.
-     * @param WP_User $wp_user WP_User instance.
      * @return array
      */
-    public function appendGravityFormsCapabilities($all_caps, $caps, $args, $user): array
+    public function getGravityFormsCapabilities(): array
     {
-        if (!in_array($this->role, $user->roles)) {
-            return $all_caps;
+        if (!$this->hasGravityFormsCapabilities()) {
+            return [];
         }
 
         // Grant access to Gravity Forms
         // https://docs.gravityforms.com/role-management-guide/
-        $all_caps['gravityforms_create_form'] = true;
-        $all_caps['gravityforms_delete_forms'] = true;
-        $all_caps['gravityforms_edit_forms'] = true;
-        $all_caps['gravityforms_preview_forms'] = true;
-        $all_caps['gravityforms_view_entries'] = true;
-        $all_caps['gravityforms_edit_entries'] = true;
-        $all_caps['gravityforms_delete_entries'] = true;
-        $all_caps['gravityforms_view_entry_notes'] = true;
-        $all_caps['gravityforms_edit_entry_notes'] = true;
-        $all_caps['gravityforms_export_entries'] = true;
-        // $all_caps['gravityforms_view_settings'] = true;
-        // $all_caps['gravityforms_edit_settings'] = true;
-        // $all_caps['gravityforms_view_updates'] = true;
-        // $all_caps['gravityforms_view_addons'] = true;
-        // $all_caps['gravityforms_system_status'] = true;
-        // $all_caps['gravityforms_uninstall'] = true;
-        // $all_caps['gravityforms_logging'] = true;
-        // $all_caps['gravityforms_api_settings'] = true;
+        $caps['gravityforms_create_form'] = true;
+        $caps['gravityforms_delete_forms'] = true;
+        $caps['gravityforms_edit_forms'] = true;
+        $caps['gravityforms_preview_forms'] = true;
+        $caps['gravityforms_view_entries'] = true;
+        $caps['gravityforms_edit_entries'] = true;
+        $caps['gravityforms_delete_entries'] = true;
+        $caps['gravityforms_view_entry_notes'] = true;
+        $caps['gravityforms_edit_entry_notes'] = true;
+        $caps['gravityforms_export_entries'] = true;
+        // $caps['gravityforms_view_settings'] = true;
+        // $caps['gravityforms_edit_settings'] = true;
+        // $caps['gravityforms_view_updates'] = true;
+        // $caps['gravityforms_view_addons'] = true;
+        // $caps['gravityforms_system_status'] = true;
+        // $caps['gravityforms_uninstall'] = true;
+        // $caps['gravityforms_logging'] = true;
+        // $caps['gravityforms_api_settings'] = true;
 
-        return $all_caps;
+        return $caps;
     }
 
     /**
-     * Append WooCommerce capabilities
+     * Return WooCommerce capabilities
      *
-     * @param array $all_caps Current user capabilities.
-     * @param array $caps User capabilities to check.
-     * @param array $args Additional user_can function parameters.
-     * @param WP_User $wp_user WP_User instance.
      * @return array
      */
-    public function appendWooCommerceCapabilities($all_caps, $caps, $args, $user): array
+    public function getWooCommerceCapabilities(): array
     {
-        if (!in_array($this->role, $user->roles)) {
-            return $all_caps;
+        if (!$this->hasWooCommerceCapabilities()) {
+            return [];
         }
 
         // Grant access to WooCommerce post types
@@ -674,53 +627,49 @@ class Plugin
         ];
 
         foreach ($types as $type) {
-            $all_caps["edit_{$type}"] = true;
-            $all_caps["read_{$type}"] = true;
-            $all_caps["delete_{$type}"] = true;
-            $all_caps["edit_{$type}s"] = true;
-            $all_caps["edit_others_{$type}s"] = true;
-            $all_caps["publish_{$type}s"] = true;
-            $all_caps["read_private_{$type}s"] = true;
-            $all_caps["delete_{$type}s"] = true;
-            $all_caps["delete_private_{$type}s"] = true;
-            $all_caps["delete_published_{$type}s"] = true;
-            $all_caps["delete_others_{$type}s"] = true;
-            $all_caps["edit_private_{$type}s"] = true;
-            $all_caps["edit_published_{$type}s"] = true;
-            $all_caps["manage_{$type}_terms"] = true;
-            $all_caps["edit_{$type}_terms"] = true;
-            $all_caps["delete_{$type}_terms"] = true;
-            $all_caps["assign_{$type}_terms"] = true;
+            $caps["edit_{$type}"] = true;
+            $caps["read_{$type}"] = true;
+            $caps["delete_{$type}"] = true;
+            $caps["edit_{$type}s"] = true;
+            $caps["edit_others_{$type}s"] = true;
+            $caps["publish_{$type}s"] = true;
+            $caps["read_private_{$type}s"] = true;
+            $caps["delete_{$type}s"] = true;
+            $caps["delete_private_{$type}s"] = true;
+            $caps["delete_published_{$type}s"] = true;
+            $caps["delete_others_{$type}s"] = true;
+            $caps["edit_private_{$type}s"] = true;
+            $caps["edit_published_{$type}s"] = true;
+            $caps["manage_{$type}_terms"] = true;
+            $caps["edit_{$type}_terms"] = true;
+            $caps["delete_{$type}_terms"] = true;
+            $caps["assign_{$type}_terms"] = true;
         }
 
         // Grant access to WooCommerce settings
-        $all_caps['manage_woocommerce'] = true;
-        $all_caps['view_woocommerce_reports'] = true;
+        $caps['manage_woocommerce'] = true;
+        $caps['view_woocommerce_reports'] = true;
 
-        return $all_caps;
+        return $caps;
     }
 
     /**
-     * Append Yoast capabilities
+     * Return Yoast capabilities
      *
-     * @param array $all_caps Current user capabilities.
-     * @param array $caps User capabilities to check.
-     * @param array $args Additional user_can function parameters.
-     * @param WP_User $wp_user WP_User instance.
      * @return array
      */
-    public function appendYoastCapabilities($all_caps, $caps, $args, $user): array
+    public function getYoastCapabilities(): array
     {
-        if (!in_array($this->role, $user->roles)) {
-            return $all_caps;
+        if (!$this->hasYoastCapabilities()) {
+            return [];
         }
 
         // Grant access to Yoast
-        $all_caps['wpseo_bulk_edit'] = true;
-        $all_caps['wpseo_edit_advanced_metadata'] = true;
-        $all_caps['wpseo_manage_options'] = true;
-        $all_caps['wpseo_manage_redirects'] = true;
+        $caps['wpseo_bulk_edit'] = true;
+        $caps['wpseo_edit_advanced_metadata'] = true;
+        $caps['wpseo_manage_options'] = true;
+        $caps['wpseo_manage_redirects'] = true;
 
-        return $all_caps;
+        return $caps;
     }
 }

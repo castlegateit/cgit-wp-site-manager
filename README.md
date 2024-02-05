@@ -2,6 +2,10 @@
 
 Castlegate IT WP Site Manager is a WordPress plugin that adds a site manager user role with the same capabilities as an editor, plus the ability to edit navigation menus and make changes to non-administrator users. The role also allows a user to edit the privacy policy page without giving full access to the site options.
 
+## Changes since v1.4.0
+
+Before version 1.4.0, this plugin used the `user_has_cap` filter to grant additional capabilities to the Site Manager role as required. This stopped working with Yoast version 21.9.0 and so Site Manager now adds its capabilities directly to the user role on plugin activation. Therefore, if you upgrade to Site Manager 1.4.0, you must **reactivate the plugin** to reset the user capabilities.
+
 ## Filters
 
 *   `cgit_site_manager_role_name` filters the role name. Default value `cgit_site_manager`.
@@ -21,6 +25,7 @@ If installed and active, site manager users will be granted access to the featur
 
 *   [Gravity Forms](https://www.gravityforms.com/)
 *   [WooCommerce](https://woocommerce.com/)
+*   [Yoast](https://yoast.com/) (Free and Premium)
 
 ## Disable features
 

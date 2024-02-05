@@ -5,7 +5,7 @@
 Plugin Name: Castlegate IT WP Site Manager
 Plugin URI: https://github.com/castlegateit/cgit-wp-site-manager
 Description: Site Manager user role with limited admin capabilities.
-Version: 1.3.0
+Version: 1.4.0
 Author: Castlegate IT
 Author URI: https://www.castlegateit.co.uk/
 Network: true
