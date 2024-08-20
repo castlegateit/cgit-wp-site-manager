@@ -1,6 +1,6 @@
 <?php
 
-namespace Cgit\SiteManager;
+namespace Castlegate\SiteManager;
 
 class Plugin
 {
@@ -55,7 +55,7 @@ class Plugin
      */
     public function __construct()
     {
-        $plugin = CGIT_SITE_MANAGER_PLUGIN;
+        $plugin = CGIT_WP_SITE_MANAGER_PLUGIN_FILE;
 
         $this->role = apply_filters('cgit_site_manager_role_name', $this->role);
         $this->label = apply_filters('cgit_site_manager_role_label', $this->label);
@@ -69,6 +69,16 @@ class Plugin
         $this->addUserActions();
         $this->addThemeActions();
         $this->addPrivacyPolicyActions();
+    }
+
+    /**
+     * Initialization
+     *
+     * @return void
+     */
+    public static function init(): void
+    {
+        $plugin = new static();
     }
 
     /**

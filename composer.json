@@ -1,0 +1,8 @@
+{
+    "name": "castlegate/cgit-wp-site-manager",
+    "autoload": {
+        "psr-4": {
+            "Castlegate\\SiteManager\\": "classes"
+        }
+    }
+}
