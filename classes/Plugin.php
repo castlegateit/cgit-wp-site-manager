@@ -360,8 +360,9 @@ class Plugin
     public function blockThemeEdit($screen)
     {
         $blocked = apply_filters('cgit_site_manager_blocked_screens', [
-            'themes',
             'customize',
+            'site-editor',
+            'themes',
             'widgets',
         ]);
 
@@ -424,6 +425,7 @@ class Plugin
 
         $blocked = apply_filters('cgit_site_manager_blocked_pages', [
             'customize.php',
+            'site-editor.php',
             'themes.php',
             'widgets.php',
         ]);
