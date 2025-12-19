@@ -2,7 +2,7 @@
 
 namespace Castlegate\SiteManager;
 
-class Plugin
+final class Plugin
 {
     /**
      * Custom role name
